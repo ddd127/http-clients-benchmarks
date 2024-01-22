@@ -46,7 +46,7 @@ public class Example_04_BatchMultipleThreads {
         @Setup(Level.Trial)
         public void setup() {
             client = HttpClient.newBuilder()
-                    .executor(Executors.newFixedThreadPool(4))
+                    .executor(Executors.newFixedThreadPool(threads))
                     .build();
         }
 

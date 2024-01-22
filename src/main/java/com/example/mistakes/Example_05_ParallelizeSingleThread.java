@@ -49,7 +49,7 @@ public class Example_05_ParallelizeSingleThread {
         @Setup(Level.Trial)
         public void setup() {
             client = HttpClient.newBuilder()
-                    .executor(Executors.newFixedThreadPool(4))
+                    .executor(Executors.newFixedThreadPool(threads))
                     .build();
             futures = Stream.<CompletableFuture<HttpResponse<byte[]>>>generate(() -> null)
                     .limit(parallelism)

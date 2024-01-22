@@ -47,7 +47,7 @@ public class Example_06_ParallelizeMultipleThreads {
         @Setup(Level.Trial)
         public void setup() {
             client = HttpClient.newBuilder()
-                    .executor(Executors.newFixedThreadPool(4))
+                    .executor(Executors.newFixedThreadPool(threads))
                     .build();
         }
 

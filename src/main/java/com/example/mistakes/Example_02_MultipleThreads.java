@@ -43,7 +43,7 @@ public class Example_02_MultipleThreads {
         @Setup(Level.Trial)
         public void setup() {
             client = HttpClient.newBuilder()
-                    .executor(Executors.newFixedThreadPool(4))
+                    .executor(Executors.newFixedThreadPool(threads))
                     .build();
         }
 
