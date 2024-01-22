@@ -4,6 +4,7 @@ import com.example.client.impl.ApacheClientAdapter;
 import com.example.client.impl.AsyncClientAdapter;
 import com.example.client.impl.BaselineClientAdapter;
 import com.example.client.impl.JavaClientAdapter;
+import com.example.client.impl.JettyClientAdapter;
 
 public enum AdaptedClient {
 
@@ -36,6 +37,14 @@ public enum AdaptedClient {
         @Override
         public ClientAdapter<?, ?> createClient(ClientConfiguration configuration) {
             return new ApacheClientAdapter(configuration);
+        }
+    },
+
+    JETTY_CLIENT() {
+
+        @Override
+        public ClientAdapter<?, ?> createClient(ClientConfiguration configuration) {
+            return new JettyClientAdapter(configuration);
         }
     },
     ;
