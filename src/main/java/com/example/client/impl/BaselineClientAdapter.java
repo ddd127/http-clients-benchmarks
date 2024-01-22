@@ -4,6 +4,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -44,13 +45,14 @@ public class BaselineClientAdapter implements ClientAdapter<HttpRequest, HttpRes
 
     @Override
     public Future<HttpResponse<byte[]>> send(final HttpRequest request) {
-        return executor.submit(() -> {
-            try {
-                return client.send(request, HttpResponse.BodyHandlers.ofByteArray());
-            } catch (Exception e) {
-                throw new RuntimeException("HTTP request failed", e);
-            }
-        });
+        final CompletableFuture<HttpResponse<byte[]>> result = new CompletableFuture<>();
+        try {
+            final var response = client.send(request, HttpResponse.BodyHandlers.ofByteArray());
+            result.complete(response);
+        } catch (Exception e) {
+            result.completeExceptionally(e);
+        }
+        return result;
     }
 
     @Override
