@@ -23,5 +23,5 @@ public interface ClientAdapter<REQUEST_TYPE, RESPONSE_TYPE> {
 
     Future<RESPONSE_TYPE> send(final REQUEST_TYPE request);
 
-    void shutdown();
+    void shutdown() throws Exception;
 }
