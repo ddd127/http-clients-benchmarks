@@ -1,5 +1,6 @@
 package com.example.client;
 
+import com.example.client.impl.ApacheClientAdapter;
 import com.example.client.impl.AsyncClientAdapter;
 import com.example.client.impl.BaselineClientAdapter;
 import com.example.client.impl.JavaClientAdapter;
@@ -27,6 +28,14 @@ public enum AdaptedClient {
         @Override
         public ClientAdapter<?, ?> createClient(ClientConfiguration configuration) {
             return new AsyncClientAdapter(configuration);
+        }
+    },
+
+    APACHE_CLIENT() {
+
+        @Override
+        public ClientAdapter<?, ?> createClient(ClientConfiguration configuration) {
+            return new ApacheClientAdapter(configuration);
         }
     },
     ;
