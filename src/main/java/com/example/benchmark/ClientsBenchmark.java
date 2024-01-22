@@ -16,6 +16,7 @@ import com.example.client.model.ClientRequest;
 import com.example.client.model.ClientResponse;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
@@ -30,6 +31,7 @@ import org.openjdk.jmh.annotations.Warmup;
 
 @BenchmarkMode(Mode.Throughput)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
+@Fork(1)
 @Warmup(iterations = 3, time = 30)
 @Measurement(iterations = 7, time = 30)
 public class ClientsBenchmark {
@@ -40,12 +42,28 @@ public class ClientsBenchmark {
     public static class ClientState {
 
         @Param(value = {
-                "JAVA_CLIENT",
+                "BASELINE_CLIENT",
+//                "JAVA_CLIENT",
+//                "ASYNC_CLIENT",
+//                "APACHE_CLIENT",
+//                "JETTY_CLIENT",
         })
         private String clientName;
-        @Param(value = {"1", "2", "4", "8", "16"})
+        @Param(value = {
+//                "1",
+//                "2",
+                "4",
+//                "8",
+//                "16",
+        })
         private int ioThreads;
-        @Param(value = {"0", "1024", "8192", "65536", "524288"})
+        @Param(value = {
+                "0",
+//                "1024",
+//                "8192",
+//                "65536",
+//                "524288",
+        })
         private int bodySize;
 
         private ClientAdapter<?, ?> client;
@@ -72,7 +90,13 @@ public class ClientsBenchmark {
     @State(Scope.Thread)
     public static class CommonThreadState {
 
-        @Param(value = {"32", "64", "128", "256", "512"})
+        @Param(value = {
+//                "32",
+                "64",
+//                "128",
+//                "256",
+//                "512",
+        })
         private int parallelism;
         public int getProducerThreads() {
             throw new IllegalStateException("Must be defined by subclass");
@@ -84,6 +108,10 @@ public class ClientsBenchmark {
 
         @Setup(Level.Iteration)
         public void setup() {
+            final int futuresSize = parallelism / getProducerThreads();
+            if (futuresSize <= 0) {
+                throw new IllegalStateException("Future size must be positive, but found " + futuresSize);
+            }
             futures = Stream.<CompletableFuture<?>>generate(() -> null)
                     .limit(parallelism / getProducerThreads())
                     .collect(Collectors.toCollection(ArrayList::new));
@@ -175,6 +203,23 @@ public class ClientsBenchmark {
     @Threads(4)
     public ClientResponse benchmark_producer_4(final ClientState clientState,
                                                final ThreadState_Producer_4 threadState) throws Exception {
+        return iteration(clientState, threadState);
+    }
+
+
+    // 8 threads-producers
+
+    public static class ThreadState_Producer_8 extends CommonThreadState {
+        @Override
+        public int getProducerThreads() {
+            return 8;
+        }
+    }
+
+    @Benchmark
+    @Threads(8)
+    public ClientResponse benchmark_producer_8(final ClientState clientState,
+                                               final ThreadState_Producer_8 threadState) throws Exception {
         return iteration(clientState, threadState);
     }
 }
