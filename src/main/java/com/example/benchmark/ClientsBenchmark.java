@@ -32,8 +32,8 @@ import org.openjdk.jmh.annotations.Warmup;
 @BenchmarkMode(Mode.Throughput)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @Fork(1)
-@Warmup(iterations = 3, time = 30)
-@Measurement(iterations = 7, time = 30)
+@Warmup(iterations = 2, time = 15)
+@Measurement(iterations = 3, time = 10)
 public class ClientsBenchmark {
 
     private static final String URL = "http://localhost:8080/do_request";
@@ -43,26 +43,26 @@ public class ClientsBenchmark {
 
         @Param(value = {
                 "BASELINE_CLIENT",
-//                "JAVA_CLIENT",
-//                "ASYNC_CLIENT",
-//                "APACHE_CLIENT",
-//                "JETTY_CLIENT",
+                "JAVA_CLIENT",
+                "ASYNC_CLIENT",
+                "APACHE_CLIENT",
+                "JETTY_CLIENT",
         })
         private String clientName;
         @Param(value = {
-//                "1",
-//                "2",
+                "1",
+                "2",
                 "4",
-//                "8",
-//                "16",
+                "8",
+                "16",
         })
         private int ioThreads;
         @Param(value = {
                 "0",
-//                "1024",
-//                "8192",
-//                "65536",
-//                "524288",
+                "1024",
+                "8192",
+                "65536",
+                "524288",
         })
         private int bodySize;
 
@@ -91,11 +91,11 @@ public class ClientsBenchmark {
     public static class CommonThreadState {
 
         @Param(value = {
-//                "32",
+                "32",
                 "64",
-//                "128",
-//                "256",
-//                "512",
+                "128",
+                "256",
+                "512",
         })
         private int parallelism;
         public int getProducerThreads() {
