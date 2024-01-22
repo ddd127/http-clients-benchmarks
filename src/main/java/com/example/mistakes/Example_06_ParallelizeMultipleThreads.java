@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
@@ -31,6 +32,7 @@ import org.openjdk.jmh.annotations.Warmup;
 @SuppressWarnings("Duplicates")
 @BenchmarkMode(Mode.Throughput)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
+@Fork(1)
 @Warmup(iterations = 3, time = 10)
 @Measurement(iterations = 7, time = 10)
 public class Example_06_ParallelizeMultipleThreads {
@@ -104,24 +106,28 @@ public class Example_06_ParallelizeMultipleThreads {
         }
     }
 
+    @Benchmark
     @Threads(2)
     public HttpResponse<byte[]> benchmark_threads_2(final BenchmarkState benchmarkState,
                                                     final ThreadState threadState) throws Exception {
         return benchmark(benchmarkState, threadState);
     }
 
+    @Benchmark
     @Threads(4)
     public HttpResponse<byte[]> benchmark_threads_4(final BenchmarkState benchmarkState,
                                                     final ThreadState threadState) throws Exception {
         return benchmark(benchmarkState, threadState);
     }
 
+    @Benchmark
     @Threads(8)
     public HttpResponse<byte[]> benchmark_threads_8(final BenchmarkState benchmarkState,
                                                     final ThreadState threadState) throws Exception {
         return benchmark(benchmarkState, threadState);
     }
 
+    @Benchmark
     @Threads(16)
     public HttpResponse<byte[]> benchmark_threads_16(final BenchmarkState benchmarkState,
                                                     final ThreadState threadState) throws Exception {

@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
@@ -29,6 +30,7 @@ import org.openjdk.jmh.annotations.Warmup;
 @SuppressWarnings("Duplicates")
 @BenchmarkMode(Mode.Throughput)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
+@Fork(1)
 @Warmup(iterations = 3, time = 10)
 @Measurement(iterations = 7, time = 10)
 public class Example_03_BatchSingleThread {
