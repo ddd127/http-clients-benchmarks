@@ -32,6 +32,7 @@ public class ApacheClientAdapter implements ClientAdapter<SimpleHttpRequest, Sim
                                 .build()
                 )
                 .build();
+        client.start();
     }
 
 
