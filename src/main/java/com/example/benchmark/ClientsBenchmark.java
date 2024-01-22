@@ -56,7 +56,7 @@ public class ClientsBenchmark {
         }
 
         @TearDown
-        public void tearDown() {
+        public void tearDown() throws Exception {
             client.shutdown();
         }
 

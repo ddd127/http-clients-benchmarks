@@ -4,9 +4,9 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import com.example.client.ClientAdapter;
 import com.example.client.ClientConfiguration;
@@ -43,7 +43,7 @@ public class JavaClientAdapter implements ClientAdapter<HttpRequest, HttpRespons
     }
 
     @Override
-    public CompletableFuture<HttpResponse<byte[]>> send(HttpRequest request) {
+    public Future<HttpResponse<byte[]>> send(HttpRequest request) {
         return client.sendAsync(request, HttpResponse.BodyHandlers.ofByteArray());
     }
 

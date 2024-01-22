@@ -48,7 +48,7 @@ public class BaselineClientAdapter implements ClientAdapter<HttpRequest, HttpRes
             try {
                 return client.send(request, HttpResponse.BodyHandlers.ofByteArray());
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException("HTTP request failed", e);
             }
         });
     }
