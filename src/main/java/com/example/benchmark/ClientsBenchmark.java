@@ -90,6 +90,10 @@ public class ClientsBenchmark {
     @State(Scope.Thread)
     public static class CommonThreadState {
 
+        public int getProducerThreads() {
+            throw new IllegalStateException("Must be defined by subclass");
+        }
+
         @Param(value = {
                 "32",
                 "64",
@@ -98,9 +102,6 @@ public class ClientsBenchmark {
                 "512",
         })
         private int parallelism;
-        public int getProducerThreads() {
-            throw new IllegalStateException("Must be defined by subclass");
-        }
 
         private List<Future<?>> futures;
 
@@ -149,7 +150,13 @@ public class ClientsBenchmark {
                 futures.set(i, client.sendUnchecked(request));
 
                 if (future != null) {
-                    return client.mapResponseUnchecked(future.get());
+                    try {
+                        return client.mapResponseUnchecked(future.get());
+                    } catch (Exception e) {
+                        System.err.println(
+                                "Got exception, class = '" + e.getClass().getName() + "', message = '" + e.getMessage() + "'"
+                        );
+                    }
                 }
             }
         }
