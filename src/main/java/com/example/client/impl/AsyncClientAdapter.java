@@ -20,7 +20,10 @@ public class AsyncClientAdapter implements ClientAdapter<Request, Response> {
 
     public AsyncClientAdapter(final ClientConfiguration configuration) {
         client = asyncHttpClient(
-                config().setIoThreadsCount(configuration.ioThreads())
+                config()
+                        .setIoThreadsCount(configuration.ioThreads())
+                        .setMaxConnections(Integer.MAX_VALUE)
+                        .setMaxConnectionsPerHost(Integer.MAX_VALUE)
         );
     }
 

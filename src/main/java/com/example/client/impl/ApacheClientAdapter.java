@@ -10,6 +10,7 @@ import org.apache.hc.client5.http.async.methods.SimpleHttpRequest;
 import org.apache.hc.client5.http.async.methods.SimpleHttpResponse;
 import org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient;
 import org.apache.hc.client5.http.impl.async.HttpAsyncClients;
+import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManagerBuilder;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.reactor.IOReactorConfig;
 
@@ -22,6 +23,12 @@ public class ApacheClientAdapter implements ClientAdapter<SimpleHttpRequest, Sim
                 .setIOReactorConfig(
                         IOReactorConfig.custom()
                                 .setIoThreadCount(configuration.ioThreads())
+                                .build()
+                )
+                .setConnectionManager(
+                        PoolingAsyncClientConnectionManagerBuilder.create()
+                                .setMaxConnTotal(Integer.MAX_VALUE)
+                                .setMaxConnPerRoute(Integer.MAX_VALUE)
                                 .build()
                 )
                 .build();

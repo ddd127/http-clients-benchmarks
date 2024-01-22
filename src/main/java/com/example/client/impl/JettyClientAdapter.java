@@ -24,6 +24,7 @@ public class JettyClientAdapter implements ClientAdapter<Request, ContentRespons
                 new HttpClientTransportOverHTTP(1)
         );
         client.setExecutor(executor);
+        client.setMaxConnectionsPerDestination(Integer.MAX_VALUE);
         try {
             client.start();
         } catch (Exception e) {
