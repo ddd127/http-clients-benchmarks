@@ -23,6 +23,7 @@ public class JettyClientAdapter implements ClientAdapter<Request, ContentRespons
         this.client = new HttpClient(
                 new HttpClientTransportOverHTTP(1)
         );
+        client.setMaxRequestsQueuedPerDestination(4096);
         client.setExecutor(executor);
         client.setMaxConnectionsPerDestination(Integer.MAX_VALUE);
         try {
@@ -48,8 +49,7 @@ public class JettyClientAdapter implements ClientAdapter<Request, ContentRespons
 
     @Override
     public Future<ContentResponse> send(Request request) {
-        final var listener = new CompletableResponseListener(request);
-        return listener.send();
+        return new CompletableResponseListener(request).send();
     }
 
     @Override
