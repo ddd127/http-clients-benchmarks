@@ -1,8 +1,17 @@
 package com.example.client;
 
+import com.example.client.impl.BaselineClientAdapter;
 import com.example.client.impl.JavaClientAdapter;
 
 public enum AdaptedClient {
+
+    BASELINE_CLIENT() {
+
+        @Override
+        public ClientAdapter<?, ?> createClient(ClientConfiguration configuration) {
+            return new BaselineClientAdapter(configuration);
+        }
+    },
 
     JAVA_CLIENT() {
 
@@ -10,7 +19,7 @@ public enum AdaptedClient {
         public ClientAdapter<?, ?> createClient(ClientConfiguration configuration) {
             return new JavaClientAdapter(configuration);
         }
-    }
+    },
     ;
 
     public abstract ClientAdapter<?, ?> createClient(final ClientConfiguration configuration);
