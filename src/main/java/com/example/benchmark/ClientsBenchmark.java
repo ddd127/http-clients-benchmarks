@@ -32,8 +32,8 @@ import org.openjdk.jmh.annotations.Warmup;
 @BenchmarkMode(Mode.Throughput)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @Fork(1)
-@Warmup(iterations = 2, time = 15)
-@Measurement(iterations = 3, time = 10)
+@Warmup(iterations = 4, time = 30)
+@Measurement(iterations = 16, time = 30)
 public class ClientsBenchmark {
 
     private static final String URL = "http://localhost:8080/do_request";
@@ -46,20 +46,20 @@ public class ClientsBenchmark {
                 "JAVA_CLIENT",
                 "ASYNC_CLIENT",
                 "APACHE_CLIENT",
-                "JETTY_CLIENT",
+//                "JETTY_CLIENT",
         })
         private String clientName;
         @Param(value = {
-                "1",
                 "2",
                 "4",
                 "8",
-                "16",
+                "12",
+//                "16",
         })
         private int ioThreads;
         @Param(value = {
                 "0",
-                "1024",
+//                "1024",
                 "8192",
                 "65536",
                 "524288",
@@ -67,23 +67,31 @@ public class ClientsBenchmark {
         private int bodySize;
 
         private ClientAdapter<?, ?> client;
+        private byte[] body;
 
         @Setup(Level.Trial)
         public void setup() {
             client = AdaptedClient.create(clientName, new ClientConfiguration(ioThreads));
+            if (bodySize == 0) {
+                body = null;
+            } else {
+                body = new byte[bodySize];
+                ThreadLocalRandom.current().nextBytes(body);
+            }
         }
 
         @TearDown
         public void tearDown() throws Exception {
             client.shutdown();
+            body = null;
         }
 
         public ClientAdapter<?, ?> getClient() {
             return client;
         }
 
-        public int getBodySize() {
-            return bodySize;
+        public byte[] getBody() {
+            return body;
         }
     }
 
@@ -95,7 +103,7 @@ public class ClientsBenchmark {
         }
 
         @Param(value = {
-                "32",
+//                "32",
                 "64",
                 "128",
                 "256",
@@ -104,8 +112,6 @@ public class ClientsBenchmark {
         private int parallelism;
 
         private List<Future<?>> futures;
-
-        private ThreadLocalRandom random;
 
         @Setup(Level.Iteration)
         public void setup() {
@@ -116,20 +122,10 @@ public class ClientsBenchmark {
             futures = Stream.<CompletableFuture<?>>generate(() -> null)
                     .limit(parallelism / getProducerThreads())
                     .collect(Collectors.toCollection(ArrayList::new));
-            random = ThreadLocalRandom.current();
         }
 
         public List<Future<?>> getFutures() {
             return futures;
-        }
-
-        public byte[] generateBodyOrNull(final int bodySize) {
-            if (bodySize == 0) {
-                return null;
-            }
-            final byte[] body = new byte[bodySize];
-            random.nextBytes(body);
-            return body;
         }
     }
 
@@ -145,7 +141,7 @@ public class ClientsBenchmark {
                     continue;
                 }
 
-                final byte[] body = threadState.generateBodyOrNull(clientState.getBodySize());
+                final byte[] body = clientState.getBody();
                 final Object request = client.mapRequest(new ClientRequest(URL, body));
                 futures.set(i, client.sendUnchecked(request));
 
