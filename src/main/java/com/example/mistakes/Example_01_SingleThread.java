@@ -28,8 +28,8 @@ import org.openjdk.jmh.annotations.Warmup;
 @BenchmarkMode(Mode.Throughput)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @Fork(1)
-@Warmup(iterations = 3, time = 30)
-@Measurement(iterations = 7, time = 30)
+@Warmup(iterations = 4, time = 30)
+@Measurement(iterations = 16, time = 30)
 public class Example_01_SingleThread {
 
     @State(Scope.Benchmark)
