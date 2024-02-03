@@ -19,7 +19,11 @@ public class JavaClientAdapter implements ClientAdapter<HttpRequest, HttpRespons
     private final HttpClient client;
 
     public JavaClientAdapter(final ClientConfiguration configuration) {
-        this.executor = Executors.newFixedThreadPool(configuration.ioThreads());
+        this(Executors.newFixedThreadPool(configuration.ioThreads()));
+    }
+
+    public JavaClientAdapter(final ExecutorService executor) {
+        this.executor = executor;
         this.client = HttpClient.newBuilder()
                 .executor(executor)
                 .build();
