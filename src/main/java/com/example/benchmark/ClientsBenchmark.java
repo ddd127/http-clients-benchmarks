@@ -7,7 +7,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.stream.IntStream;
 
 import com.example.client.AdaptedClient;
 import com.example.client.ClientAdapter;
@@ -29,6 +29,7 @@ import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
 
+@SuppressWarnings("Duplicates")
 @BenchmarkMode(Mode.Throughput)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @Fork(1)
@@ -80,9 +81,10 @@ public class ClientsBenchmark {
             }
         }
 
-        @TearDown
+        @TearDown(Level.Trial)
         public void tearDown() throws Exception {
             client.shutdown();
+            client = null;
             body = null;
         }
 
@@ -119,8 +121,8 @@ public class ClientsBenchmark {
             if (futuresSize <= 0) {
                 throw new IllegalStateException("Future size must be positive, but found " + futuresSize);
             }
-            futures = Stream.<CompletableFuture<?>>generate(() -> null)
-                    .limit(parallelism / getProducerThreads())
+            futures = IntStream.range(0, parallelism / getProducerThreads())
+                    .mapToObj(__ -> (CompletableFuture<?>) null)
                     .collect(Collectors.toCollection(ArrayList::new));
         }
 
