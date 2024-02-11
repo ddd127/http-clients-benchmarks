@@ -47,22 +47,23 @@ public class ClientsBenchmark {
                 "JAVA_CLIENT",
                 "ASYNC_CLIENT",
                 "APACHE_CLIENT",
-//                "JETTY_CLIENT",
         })
         private String clientName;
         @Param(value = {
                 "2",
                 "4",
+                "6",
                 "8",
+                "10",
                 "12",
-//                "16",
         })
         private int ioThreads;
         @Param(value = {
                 "0",
-//                "1024",
+                "2048",
                 "8192",
-                "65536",
+                "32768",
+                "131072",
                 "524288",
         })
         private int bodySize;
@@ -105,11 +106,7 @@ public class ClientsBenchmark {
         }
 
         @Param(value = {
-//                "32",
-                "64",
-                "128",
                 "256",
-                "512",
         })
         private int parallelism;
 
@@ -195,6 +192,23 @@ public class ClientsBenchmark {
     }
 
 
+    // 3 threads-producers
+
+    public static class ThreadState_Producer_3 extends CommonThreadState {
+        @Override
+        public int getProducerThreads() {
+            return 3;
+        }
+    }
+
+    @Benchmark
+    @Threads(3)
+    public ClientResponse benchmark_producer_3(final ClientState clientState,
+                                               final ThreadState_Producer_3 threadState) throws Exception {
+        return iteration(clientState, threadState);
+    }
+
+
     // 4 threads-producers
 
     public static class ThreadState_Producer_4 extends CommonThreadState {
@@ -208,23 +222,6 @@ public class ClientsBenchmark {
     @Threads(4)
     public ClientResponse benchmark_producer_4(final ClientState clientState,
                                                final ThreadState_Producer_4 threadState) throws Exception {
-        return iteration(clientState, threadState);
-    }
-
-
-    // 8 threads-producers
-
-    public static class ThreadState_Producer_8 extends CommonThreadState {
-        @Override
-        public int getProducerThreads() {
-            return 8;
-        }
-    }
-
-    @Benchmark
-    @Threads(8)
-    public ClientResponse benchmark_producer_8(final ClientState clientState,
-                                               final ThreadState_Producer_8 threadState) throws Exception {
         return iteration(clientState, threadState);
     }
 }
