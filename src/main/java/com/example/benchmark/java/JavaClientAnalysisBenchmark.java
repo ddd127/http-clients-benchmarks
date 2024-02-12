@@ -46,8 +46,8 @@ import org.openjdk.jmh.annotations.Warmup;
 @BenchmarkMode(Mode.Throughput)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @Fork(1)
-@Warmup(iterations = 3, time = 20)
-@Measurement(iterations = 6, time = 20)
+@Warmup(iterations = 2, time = 30)
+@Measurement(iterations = 3, time = 20)
 public class JavaClientAnalysisBenchmark {
 
     private static final String URL = "http://localhost:8080/do_request";
@@ -55,11 +55,11 @@ public class JavaClientAnalysisBenchmark {
     @State(Scope.Benchmark)
     public static class ClientState {
 
-        @Param(value = {
-                "1",
-                "2",
-        })
-        private int clientsCount;
+//        @Param(value = {
+//                "1",
+//                "2",
+//        })
+//        private int clientsCount;
         @Param(value = {
                 "2",
                 "4",
@@ -95,10 +95,10 @@ public class JavaClientAnalysisBenchmark {
 
         @Setup(Level.Trial)
         public void setup() {
-            executor = new ForkJoinPool(ioThreads);
-//            executor = Executors.newFixedThreadPool(ioThreads);
-//            ((ThreadPoolExecutor) executor).prestartAllCoreThreads();
-            clients = IntStream.range(0, clientsCount)
+//            executor = new ForkJoinPool(ioThreads);
+            executor = Executors.newFixedThreadPool(ioThreads);
+            ((ThreadPoolExecutor) executor).prestartAllCoreThreads();
+            clients = IntStream.range(0, 1)
                     .mapToObj((__) -> new JavaClientAdapter(executor))
                     .collect(Collectors.toList());
             if (bodySize == 0) {
