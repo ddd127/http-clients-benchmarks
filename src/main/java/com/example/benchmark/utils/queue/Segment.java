@@ -78,6 +78,10 @@ class Segment<ITEM> {
         return dequeIdx.getAndIncrement();
     }
 
+    int getAndDecDequeIdx() {
+        return dequeIdx.getAndDecrement();
+    }
+
     boolean tryIncDequeIdx(int expected) {
         return dequeIdx.compareAndSet(expected, expected + 1);
     }
@@ -90,4 +94,3 @@ class Segment<ITEM> {
         return items.length();
     }
 }
-

@@ -4,9 +4,12 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import com.example.client.ClientAdapter;
 import com.example.client.ClientConfiguration;
@@ -20,6 +23,16 @@ public class JavaClientAdapter implements ClientAdapter<HttpRequest, HttpRespons
 
     public JavaClientAdapter(final ClientConfiguration configuration) {
         this(Executors.newFixedThreadPool(configuration.ioThreads()));
+    }
+
+    public JavaClientAdapter(final ClientConfiguration configuration, final BlockingQueue<Runnable> queue) {
+        this(new ThreadPoolExecutor(
+                configuration.ioThreads(),
+                configuration.ioThreads(),
+                0L,
+                TimeUnit.MILLISECONDS,
+                queue
+        ));
     }
 
     public JavaClientAdapter(final ExecutorService executor) {
