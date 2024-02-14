@@ -9,26 +9,33 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.openjdk.jmh.infra.Blackhole;
+
 public class CheatingQueue<ITEM> extends AbstractQueue<ITEM> implements BlockingQueue<ITEM> {
 
-    private static final int DEFAULT_SEGMENT_SIZE = 8;
+    public static final int DEFAULT_SEGMENT_SIZE = 8;
+    public static final int DEFAULT_CPU_CONSUMING = 8;
     private final AtomicReference<Segment<ITEM>> head;
     private final AtomicReference<Segment<ITEM>> tail;
     private final AtomicInteger size;
-    private final AtomicInteger state;
     private final int segmentSize;
+    private final int cpuConsuming;
 
-    public CheatingQueue(final int segmentSize) {
+    public CheatingQueue(final int segmentSize, final int cpuConsuming) {
         this.segmentSize = segmentSize;
+        this.cpuConsuming = cpuConsuming;
         size = new AtomicInteger(0);
-        state = new AtomicInteger(0);
         final Segment<ITEM> initNode = new Segment<>(this.segmentSize);
         head = new AtomicReference<>(initNode);
         tail = new AtomicReference<>(initNode);
     }
 
+    public CheatingQueue(final int segmentSize) {
+        this(segmentSize, DEFAULT_CPU_CONSUMING);
+    }
+
     public CheatingQueue() {
-        this(DEFAULT_SEGMENT_SIZE);
+        this(DEFAULT_SEGMENT_SIZE, DEFAULT_CPU_CONSUMING);
     }
 
     @Override
@@ -115,19 +122,6 @@ public class CheatingQueue<ITEM> extends AbstractQueue<ITEM> implements Blocking
     @Override
     public Iterator<ITEM> iterator() {
         throw new UnsupportedOperationException();
-//        final var c = new ArrayList<ITEM>();
-//        var segment = head.get();
-//        while (segment != null) {
-//            head.set(segment);
-//            for (int index = segment.getDequeIdx(); index < segment.getEnqueueIdx(); ++index) {
-//                final var getResult = segment.tryGet(index);
-//                if (getResult != null) {
-//                    c.add(getResult.orElse(null));
-//                }
-//            }
-//            segment = segment.getNext();
-//        }
-//        return c.iterator();
     }
 
     @Override
@@ -177,6 +171,7 @@ public class CheatingQueue<ITEM> extends AbstractQueue<ITEM> implements Blocking
     @Override
     public boolean isEmpty() {
         while (true) {
+            consumeCpu();
             final var currentHead = head.get();
             if (currentHead.isEmpty()) {
                 final var next = currentHead.getNext();
@@ -197,6 +192,7 @@ public class CheatingQueue<ITEM> extends AbstractQueue<ITEM> implements Blocking
      * @return true if enqueued successfully, false otherwise.
      */
     private boolean tryOffer(final ITEM item) {
+        consumeCpu();
         final var currentTail = tail.get();
         final int enqueuePosition = currentTail.getAndIncEnqueueIdx();
         if (enqueuePosition >= currentTail.capacity()) {
@@ -205,7 +201,7 @@ public class CheatingQueue<ITEM> extends AbstractQueue<ITEM> implements Blocking
                 tail.compareAndSet(currentTail, next);
                 return false;
             }
-            final var newTail = new Segment<ITEM>(segmentSize, item);
+            final var newTail = new Segment<>(segmentSize, item);
             if (!currentTail.trySetNext(newTail)) {
                 return false;
             }
@@ -228,6 +224,7 @@ public class CheatingQueue<ITEM> extends AbstractQueue<ITEM> implements Blocking
      * @return null if poll failed, Optional.empty() if there is null value, Optional.of() otherwise
      */
     private Optional<ITEM> tryPoll() {
+        consumeCpu();
         final var currentHead = head.get();
         final int dequePosition = currentHead.getAndIncDequeIdx();
         if (dequePosition >= currentHead.capacity()) {
@@ -254,6 +251,7 @@ public class CheatingQueue<ITEM> extends AbstractQueue<ITEM> implements Blocking
      * @return null if peek failed, Optional.empty() if there is null value, Optional.of() otherwise
      */
     private Optional<ITEM> tryPeek() {
+        consumeCpu();
         final var currentHead = head.get();
         final int dequePosition = currentHead.getDequeIdx();
         if (dequePosition >= currentHead.capacity()) {
@@ -269,6 +267,12 @@ public class CheatingQueue<ITEM> extends AbstractQueue<ITEM> implements Blocking
                 currentHead.tryIncDequeIdx(dequePosition);
             }
             return result;
+        }
+    }
+
+    private void consumeCpu() {
+        if (cpuConsuming != 0) {
+            Blackhole.consumeCPU(cpuConsuming);
         }
     }
 }
