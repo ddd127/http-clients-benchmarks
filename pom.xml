@@ -20,6 +20,8 @@
         <async-http-client.version>2.12.3</async-http-client.version>
         <httpclient5.version>5.3</httpclient5.version>
         <jetty-client.version>12.0.5</jetty-client.version>
+
+        <jctools.version>4.0.3</jctools.version>
     </properties>
 
     <dependencies>
@@ -49,6 +51,11 @@
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-client</artifactId>
             <version>${jetty-client.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jctools</groupId>
+            <artifactId>jctools-core</artifactId>
+            <version>${jctools.version}</version>
         </dependency>
     </dependencies>
 

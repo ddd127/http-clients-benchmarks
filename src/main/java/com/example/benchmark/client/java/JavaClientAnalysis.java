@@ -12,6 +12,7 @@ import java.util.stream.IntStream;
 
 import com.example.benchmark.utils.queue.CheatingQueue;
 import com.example.benchmark.utils.queue.NonBlockingQueue;
+import com.example.benchmark.utils.queue.MpmcArrayQueueAdapter;
 import com.example.client.AdaptedClient;
 import com.example.client.ClientAdapter;
 import com.example.client.ClientConfiguration;
@@ -52,8 +53,8 @@ public class JavaClientAnalysis {
         private String clientName;
         @Param(value = {
 //                "LinkedBlockingQueue",
-//                "NonBlockingQueue",
-                "CheatingQueue",
+//                "CheatingQueue_NoConsume",
+                "JCTools_Mpmc",
         })
         private String queueName;
         @Param(value = {
@@ -82,8 +83,10 @@ public class JavaClientAnalysis {
                     new ClientConfiguration(ioThreads),
                     switch (queueName) {
                         case "LinkedBlockingQueue" -> new LinkedBlockingQueue<>();
+                        case "JCTools_Mpmc" -> new MpmcArrayQueueAdapter<>(4096);
                         case "NonBlockingQueue" -> new NonBlockingQueue<>();
-                        case "CheatingQueue" -> new CheatingQueue<>();
+                        case "CheatingQueue_NoConsume" -> new CheatingQueue<>();
+                        case "CheatingQueue_Consume_42" -> new CheatingQueue<>(CheatingQueue.DEFAULT_SEGMENT_SIZE, 42);
                         default -> throw new IllegalArgumentException("Unknown queue name: '" + queueName + "'");
                     }
             );
