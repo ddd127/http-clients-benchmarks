@@ -1,4 +1,4 @@
-package com.example.benchmark.client.baseline;
+package com.example.benchmark.analysis.baseline;
 
 import java.util.ArrayList;
 import java.util.List;

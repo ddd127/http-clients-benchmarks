@@ -43,9 +43,9 @@ public class ClientsBenchmark {
     public static class ClientState {
 
         @Param(value = {
-                "BASELINE_CLIENT",
-                "JAVA_CLIENT",
-                "ASYNC_CLIENT",
+//                "BASELINE_CLIENT",
+//                "JAVA_CLIENT",
+//                "ASYNC_CLIENT",
                 "APACHE_CLIENT",
         })
         private String clientName;
@@ -55,12 +55,12 @@ public class ClientsBenchmark {
                 "6",
                 "8",
                 "10",
-                "12",
+//                "12",
         })
         private int ioThreads;
         @Param(value = {
                 "0",
-                "2048",
+//                "2048",
                 "8192",
                 "32768",
                 "131072",

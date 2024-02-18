@@ -12,6 +12,7 @@ import org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient;
 import org.apache.hc.client5.http.impl.async.HttpAsyncClients;
 import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManagerBuilder;
 import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.pool.PoolConcurrencyPolicy;
 import org.apache.hc.core5.reactor.IOReactorConfig;
 
 public class ApacheClientAdapter implements ClientAdapter<SimpleHttpRequest, SimpleHttpResponse> {
@@ -19,6 +20,10 @@ public class ApacheClientAdapter implements ClientAdapter<SimpleHttpRequest, Sim
     private final CloseableHttpAsyncClient client;
 
     public ApacheClientAdapter(final ClientConfiguration configuration) {
+        this(configuration, PoolConcurrencyPolicy.LAX);
+    }
+
+    public ApacheClientAdapter(final ClientConfiguration configuration, final PoolConcurrencyPolicy pollPolicy) {
         this.client = HttpAsyncClients.custom()
                 .setIOReactorConfig(
                         IOReactorConfig.custom()
@@ -27,6 +32,7 @@ public class ApacheClientAdapter implements ClientAdapter<SimpleHttpRequest, Sim
                 )
                 .setConnectionManager(
                         PoolingAsyncClientConnectionManagerBuilder.create()
+                                .setPoolConcurrencyPolicy(pollPolicy)
                                 .setMaxConnTotal(Integer.MAX_VALUE)
                                 .setMaxConnPerRoute(Integer.MAX_VALUE)
                                 .build()
@@ -34,7 +40,6 @@ public class ApacheClientAdapter implements ClientAdapter<SimpleHttpRequest, Sim
                 .build();
         client.start();
     }
-
 
     @Override
     public SimpleHttpRequest mapRequest(ClientRequest clientRequest) {

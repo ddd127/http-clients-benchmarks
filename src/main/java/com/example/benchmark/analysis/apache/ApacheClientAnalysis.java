@@ -1,24 +1,21 @@
-package com.example.benchmark.client.java;
+package com.example.benchmark.analysis.apache;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import com.example.benchmark.utils.queue.CheatingQueue;
-import com.example.benchmark.utils.queue.NonBlockingQueue;
-import com.example.benchmark.utils.queue.MpmcArrayQueueAdapter;
 import com.example.client.AdaptedClient;
 import com.example.client.ClientAdapter;
 import com.example.client.ClientConfiguration;
-import com.example.client.impl.JavaClientAdapter;
+import com.example.client.impl.ApacheClientAdapter;
 import com.example.client.model.ClientRequest;
 import com.example.client.model.ClientResponse;
+import org.apache.hc.core5.pool.PoolConcurrencyPolicy;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -39,8 +36,8 @@ import org.openjdk.jmh.annotations.Warmup;
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @Fork(1)
 @Warmup(iterations = 2, time = 30)
-@Measurement(iterations = 6, time = 20)
-public class JavaClientAnalysis {
+@Measurement(iterations = 4, time = 30)
+public class ApacheClientAnalysis {
 
     private static final String URL = "http://localhost:8080/do_request";
 
@@ -48,48 +45,43 @@ public class JavaClientAnalysis {
     public static class ClientState {
 
         @Param(value = {
-                "JAVA_CLIENT",
+                "APACHE_CLIENT",
         })
         private String clientName;
         @Param(value = {
-//                "LinkedBlockingQueue",
-//                "CheatingQueue_NoConsume",
-                "JCTools_Mpmc",
+                "STRICT",
+                "LAX",
         })
-        private String queueName;
+        private String pollPolicy;
         @Param(value = {
                 "2",
                 "4",
-                "6",
+//                "6",
                 "8",
-                "10",
-                "12",
+//                "10",
+//                "12",
+                "16",
         })
         private int ioThreads;
         @Param(value = {
                 "0",
+//                "2048",
+//                "8192",
+//                "32768",
+//                "131072",
+//                "524288",
         })
         private int bodySize;
 
-        private JavaClientAdapter client;
+        private ClientAdapter<?, ?> client;
         private byte[] body;
 
         @Setup(Level.Trial)
         public void setup() {
-            if (!AdaptedClient.JAVA_CLIENT.name().equals(clientName)) {
+            if (!AdaptedClient.APACHE_CLIENT.name().equals(clientName)) {
                 throw new IllegalArgumentException("Wrong client name + '" + clientName + "'");
             }
-            client = new JavaClientAdapter(
-                    new ClientConfiguration(ioThreads),
-                    switch (queueName) {
-                        case "LinkedBlockingQueue" -> new LinkedBlockingQueue<>();
-                        case "JCTools_Mpmc" -> new MpmcArrayQueueAdapter<>(4096);
-                        case "NonBlockingQueue" -> new NonBlockingQueue<>();
-                        case "CheatingQueue_NoConsume" -> new CheatingQueue<>();
-                        case "CheatingQueue_Consume_42" -> new CheatingQueue<>(CheatingQueue.DEFAULT_SEGMENT_SIZE, 42);
-                        default -> throw new IllegalArgumentException("Unknown queue name: '" + queueName + "'");
-                    }
-            );
+            client = new ApacheClientAdapter(new ClientConfiguration(ioThreads), PoolConcurrencyPolicy.valueOf(pollPolicy));
             if (bodySize == 0) {
                 body = null;
             } else {
@@ -191,53 +183,53 @@ public class JavaClientAnalysis {
     }
 
 
-//    // 2 threads-producers
-//
-//    public static class ThreadState_Producer_2 extends CommonThreadState {
-//        @Override
-//        public int getProducerThreads() {
-//            return 2;
-//        }
-//    }
-//
-//    @Benchmark
-//    @Threads(2)
-//    public ClientResponse benchmark_producer_2(final ClientState clientState,
-//                                               final ThreadState_Producer_2 threadState) throws Exception {
-//        return iteration(clientState, threadState);
-//    }
-//
-//
-//    // 3 threads-producers
-//
-//    public static class ThreadState_Producer_3 extends CommonThreadState {
-//        @Override
-//        public int getProducerThreads() {
-//            return 3;
-//        }
-//    }
-//
-//    @Benchmark
-//    @Threads(3)
-//    public ClientResponse benchmark_producer_3(final ClientState clientState,
-//                                               final ThreadState_Producer_3 threadState) throws Exception {
-//        return iteration(clientState, threadState);
-//    }
-//
-//
-//    // 4 threads-producers
-//
-//    public static class ThreadState_Producer_4 extends CommonThreadState {
-//        @Override
-//        public int getProducerThreads() {
-//            return 4;
-//        }
-//    }
-//
-//    @Benchmark
-//    @Threads(4)
-//    public ClientResponse benchmark_producer_4(final ClientState clientState,
-//                                               final ThreadState_Producer_4 threadState) throws Exception {
-//        return iteration(clientState, threadState);
-//    }
+    // 2 threads-producers
+
+    public static class ThreadState_Producer_2 extends CommonThreadState {
+        @Override
+        public int getProducerThreads() {
+            return 2;
+        }
+    }
+
+    @Benchmark
+    @Threads(2)
+    public ClientResponse benchmark_producer_2(final ClientState clientState,
+                                               final ThreadState_Producer_2 threadState) throws Exception {
+        return iteration(clientState, threadState);
+    }
+
+
+    // 3 threads-producers
+
+    public static class ThreadState_Producer_3 extends CommonThreadState {
+        @Override
+        public int getProducerThreads() {
+            return 3;
+        }
+    }
+
+    @Benchmark
+    @Threads(3)
+    public ClientResponse benchmark_producer_3(final ClientState clientState,
+                                               final ThreadState_Producer_3 threadState) throws Exception {
+        return iteration(clientState, threadState);
+    }
+
+
+    // 4 threads-producers
+
+    public static class ThreadState_Producer_4 extends CommonThreadState {
+        @Override
+        public int getProducerThreads() {
+            return 4;
+        }
+    }
+
+    @Benchmark
+    @Threads(4)
+    public ClientResponse benchmark_producer_4(final ClientState clientState,
+                                               final ThreadState_Producer_4 threadState) throws Exception {
+        return iteration(clientState, threadState);
+    }
 }
