@@ -43,9 +43,9 @@ public class ClientsBenchmark {
     public static class ClientState {
 
         @Param(value = {
-//                "BASELINE_CLIENT",
-//                "JAVA_CLIENT",
-//                "ASYNC_CLIENT",
+                "BASELINE_CLIENT",
+                "JAVA_CLIENT",
+                "ASYNC_CLIENT",
                 "APACHE_CLIENT",
         })
         private String clientName;

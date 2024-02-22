@@ -48,13 +48,13 @@ public class JavaClientAnalysis {
         })
         private String clientName;
         @Param(value = {
-                "2",
-//                "4",
+//                "2",
+                "4",
 //                "6",
                 "8",
 //                "10",
 //                "12",
-                "16",
+//                "16",
         })
         private int ioThreads;
         @Param(value = {

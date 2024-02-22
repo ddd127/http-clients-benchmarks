@@ -35,7 +35,7 @@ import org.openjdk.jmh.annotations.Warmup;
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @Fork(1)
 @Warmup(iterations = 2, time = 30)
-@Measurement(iterations = 6, time = 20)
+@Measurement(iterations = 4, time = 30)
 public class BaselineClientAnalysis {
 
     private static final String URL = "http://localhost:8080/do_request";
@@ -171,23 +171,23 @@ public class BaselineClientAnalysis {
     }
 
 
-    // 2 threads-producers
-
-    public static class ThreadState_Producer_2 extends CommonThreadState {
-        @Override
-        public int getProducerThreads() {
-            return 2;
-        }
-    }
-
-    @Benchmark
-    @Threads(2)
-    public ClientResponse benchmark_producer_2(final ClientState clientState,
-                                               final ThreadState_Producer_2 threadState) throws Exception {
-        return iteration(clientState, threadState);
-    }
-
-
+//    // 2 threads-producers
+//
+//    public static class ThreadState_Producer_2 extends CommonThreadState {
+//        @Override
+//        public int getProducerThreads() {
+//            return 2;
+//        }
+//    }
+//
+//    @Benchmark
+//    @Threads(2)
+//    public ClientResponse benchmark_producer_2(final ClientState clientState,
+//                                               final ThreadState_Producer_2 threadState) throws Exception {
+//        return iteration(clientState, threadState);
+//    }
+//
+//
 //    // 3 threads-producers
 //
 //    public static class ThreadState_Producer_3 extends CommonThreadState {

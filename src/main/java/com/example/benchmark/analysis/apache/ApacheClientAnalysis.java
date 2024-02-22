@@ -52,7 +52,7 @@ public class ApacheClientAnalysis {
                 "STRICT",
                 "LAX",
         })
-        private String pollPolicy;
+        private String poolPolicy;
         @Param(value = {
                 "2",
                 "4",
@@ -81,7 +81,7 @@ public class ApacheClientAnalysis {
             if (!AdaptedClient.APACHE_CLIENT.name().equals(clientName)) {
                 throw new IllegalArgumentException("Wrong client name + '" + clientName + "'");
             }
-            client = new ApacheClientAdapter(new ClientConfiguration(ioThreads), PoolConcurrencyPolicy.valueOf(pollPolicy));
+            client = new ApacheClientAdapter(new ClientConfiguration(ioThreads), PoolConcurrencyPolicy.valueOf(poolPolicy));
             if (bodySize == 0) {
                 body = null;
             } else {
@@ -198,38 +198,38 @@ public class ApacheClientAnalysis {
                                                final ThreadState_Producer_2 threadState) throws Exception {
         return iteration(clientState, threadState);
     }
-
-
-    // 3 threads-producers
-
-    public static class ThreadState_Producer_3 extends CommonThreadState {
-        @Override
-        public int getProducerThreads() {
-            return 3;
-        }
-    }
-
-    @Benchmark
-    @Threads(3)
-    public ClientResponse benchmark_producer_3(final ClientState clientState,
-                                               final ThreadState_Producer_3 threadState) throws Exception {
-        return iteration(clientState, threadState);
-    }
-
-
-    // 4 threads-producers
-
-    public static class ThreadState_Producer_4 extends CommonThreadState {
-        @Override
-        public int getProducerThreads() {
-            return 4;
-        }
-    }
-
-    @Benchmark
-    @Threads(4)
-    public ClientResponse benchmark_producer_4(final ClientState clientState,
-                                               final ThreadState_Producer_4 threadState) throws Exception {
-        return iteration(clientState, threadState);
-    }
+//
+//
+//    // 3 threads-producers
+//
+//    public static class ThreadState_Producer_3 extends CommonThreadState {
+//        @Override
+//        public int getProducerThreads() {
+//            return 3;
+//        }
+//    }
+//
+//    @Benchmark
+//    @Threads(3)
+//    public ClientResponse benchmark_producer_3(final ClientState clientState,
+//                                               final ThreadState_Producer_3 threadState) throws Exception {
+//        return iteration(clientState, threadState);
+//    }
+//
+//
+//    // 4 threads-producers
+//
+//    public static class ThreadState_Producer_4 extends CommonThreadState {
+//        @Override
+//        public int getProducerThreads() {
+//            return 4;
+//        }
+//    }
+//
+//    @Benchmark
+//    @Threads(4)
+//    public ClientResponse benchmark_producer_4(final ClientState clientState,
+//                                               final ThreadState_Producer_4 threadState) throws Exception {
+//        return iteration(clientState, threadState);
+//    }
 }

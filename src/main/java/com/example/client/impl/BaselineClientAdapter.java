@@ -17,6 +17,7 @@ import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuil
 import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
+import org.apache.hc.core5.pool.PoolConcurrencyPolicy;
 
 public class BaselineClientAdapter implements ClientAdapter<ClassicHttpRequest, ClientResponse> {
 
@@ -30,6 +31,7 @@ public class BaselineClientAdapter implements ClientAdapter<ClassicHttpRequest, 
                         PoolingHttpClientConnectionManagerBuilder.create()
                                 .setMaxConnTotal(Integer.MAX_VALUE)
                                 .setMaxConnPerRoute(Integer.MAX_VALUE)
+                                .setPoolConcurrencyPolicy(PoolConcurrencyPolicy.LAX)
                                 .build()
                 )
                 .build();
