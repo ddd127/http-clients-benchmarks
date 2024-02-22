@@ -33,11 +33,11 @@ import org.openjdk.jmh.annotations.Warmup;
 @BenchmarkMode(Mode.Throughput)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @Fork(1)
-@Warmup(iterations = 4, time = 30)
-@Measurement(iterations = 16, time = 30)
+@Warmup(iterations = 2, time = 30)
+@Measurement(iterations = 6, time = 20)
 public class ClientsBenchmark {
 
-    private static final String URL = "http://localhost:8080/do_request";
+    private static final String URL = Utils.SERVER_URL;
 
     @State(Scope.Benchmark)
     public static class ClientState {

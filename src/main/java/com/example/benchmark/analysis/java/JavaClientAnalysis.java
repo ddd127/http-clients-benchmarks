@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import com.example.benchmark.Utils;
 import com.example.client.AdaptedClient;
 import com.example.client.ClientAdapter;
 import com.example.client.ClientConfiguration;
@@ -38,7 +39,7 @@ import org.openjdk.jmh.annotations.Warmup;
 @Measurement(iterations = 4, time = 30)
 public class JavaClientAnalysis {
 
-    private static final String URL = "http://localhost:8080/do_request";
+    private static final String URL = Utils.SERVER_URL;
 
     @State(Scope.Benchmark)
     public static class ClientState {
