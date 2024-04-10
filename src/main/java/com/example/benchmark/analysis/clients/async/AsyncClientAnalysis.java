@@ -1,4 +1,4 @@
-package com.example.benchmark.analysis.baseline;
+package com.example.benchmark.analysis.clients.async;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,7 @@ import com.example.benchmark.Utils;
 import com.example.client.AdaptedClient;
 import com.example.client.ClientAdapter;
 import com.example.client.ClientConfiguration;
-import com.example.client.impl.BaselineClientAdapter;
+import com.example.client.impl.AsyncClientAdapter;
 import com.example.client.model.ClientRequest;
 import com.example.client.model.ClientResponse;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -37,7 +37,7 @@ import org.openjdk.jmh.annotations.Warmup;
 @Fork(1)
 @Warmup(iterations = 2, time = 30)
 @Measurement(iterations = 4, time = 30)
-public class BaselineClientAnalysis {
+public class AsyncClientAnalysis {
 
     private static final String URL = Utils.SERVER_URL;
 
@@ -45,32 +45,39 @@ public class BaselineClientAnalysis {
     public static class ClientState {
 
         @Param(value = {
-                "BASELINE_CLIENT",
+                "ASYNC_CLIENT",
         })
         private String clientName;
         @Param(value = {
-                "2",
-                "4",
-                "6",
+//                "2",
+//                "4",
+//                "6",
                 "8",
-                "10",
-                "12",
+//                "10",
+//                "12",
+//                "14",
+                "16",
         })
         private int ioThreads;
         @Param(value = {
                 "0",
+//                "2048",
+//                "8192",
+//                "32768",
+//                "131072",
+//                "524288",
         })
         private int bodySize;
 
-        private BaselineClientAdapter client;
+        private AsyncClientAdapter client;
         private byte[] body;
 
         @Setup(Level.Trial)
         public void setup() {
-            if (!AdaptedClient.BASELINE_CLIENT.name().equals(clientName)) {
+            if (!AdaptedClient.ASYNC_CLIENT.name().equals(clientName)) {
                 throw new IllegalArgumentException("Wrong client name + '" + clientName + "'");
             }
-            client = new BaselineClientAdapter(new ClientConfiguration(ioThreads));
+            client = new AsyncClientAdapter(new ClientConfiguration(ioThreads));
             if (bodySize == 0) {
                 body = null;
             } else {

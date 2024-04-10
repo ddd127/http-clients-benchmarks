@@ -1,12 +1,11 @@
 package com.example.client.impl;
 
-import java.util.concurrent.Future;
-
 import com.example.client.ClientAdapter;
 import com.example.client.ClientConfiguration;
 import com.example.client.model.ClientRequest;
 import com.example.client.model.ClientResponse;
 import org.asynchttpclient.AsyncHttpClient;
+import org.asynchttpclient.ListenableFuture;
 import org.asynchttpclient.Request;
 import org.asynchttpclient.RequestBuilder;
 import org.asynchttpclient.Response;
@@ -41,7 +40,7 @@ public class AsyncClientAdapter implements ClientAdapter<Request, Response> {
     }
 
     @Override
-    public Future<Response> send(Request request) {
+    public ListenableFuture<Response> send(Request request) {
         return client.executeRequest(request);
     }
 

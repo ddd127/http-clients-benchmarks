@@ -1,4 +1,4 @@
-package com.example.benchmark.analysis.async;
+package com.example.benchmark.analysis.network;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,6 @@ import com.example.benchmark.Utils;
 import com.example.client.AdaptedClient;
 import com.example.client.ClientAdapter;
 import com.example.client.ClientConfiguration;
-import com.example.client.impl.AsyncClientAdapter;
 import com.example.client.model.ClientRequest;
 import com.example.client.model.ClientResponse;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -36,8 +35,8 @@ import org.openjdk.jmh.annotations.Warmup;
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @Fork(1)
 @Warmup(iterations = 2, time = 30)
-@Measurement(iterations = 4, time = 30)
-public class AsyncClientAnalysis {
+@Measurement(iterations = 12, time = 20)
+public class NetworkClientAnalysis {
 
     private static final String URL = Utils.SERVER_URL;
 
@@ -45,18 +44,17 @@ public class AsyncClientAnalysis {
     public static class ClientState {
 
         @Param(value = {
-                "ASYNC_CLIENT",
+//                "ASYNC_CLIENT",
+                "BASELINE_CLIENT",
         })
         private String clientName;
         @Param(value = {
-//                "2",
-//                "4",
-//                "6",
-                "8",
-//                "10",
-//                "12",
-//                "14",
-                "16",
+                "2",
+                "6",
+                "10",
+                "14",
+                "18",
+                "22",
         })
         private int ioThreads;
         @Param(value = {
@@ -69,15 +67,12 @@ public class AsyncClientAnalysis {
         })
         private int bodySize;
 
-        private AsyncClientAdapter client;
+        private ClientAdapter<?, ?> client;
         private byte[] body;
 
         @Setup(Level.Trial)
         public void setup() {
-            if (!AdaptedClient.ASYNC_CLIENT.name().equals(clientName)) {
-                throw new IllegalArgumentException("Wrong client name + '" + clientName + "'");
-            }
-            client = new AsyncClientAdapter(new ClientConfiguration(ioThreads));
+            client = AdaptedClient.create(clientName, new ClientConfiguration(ioThreads));
             if (bodySize == 0) {
                 body = null;
             } else {
@@ -110,7 +105,14 @@ public class AsyncClientAnalysis {
         }
 
         @Param(value = {
+                "32",
+                "64",
+                "128",
                 "256",
+                "512",
+                "1024",
+                "2048",
+                "4096",
         })
         private int parallelism;
 
@@ -161,71 +163,25 @@ public class AsyncClientAnalysis {
         }
     }
 
+    // 4 threads-producers
 
-    // 1 thread-producer
+    public static class ThreadState_Producer_4 extends CommonThreadState {
 
-    public static class ThreadState_Producer_1 extends CommonThreadState {
+        @Param(value = {
+                "4",
+        })
+        private int producerThreads;
+
         @Override
         public int getProducerThreads() {
-            return 1;
+            return producerThreads;
         }
     }
 
     @Benchmark
-    @Threads(1)
-    public ClientResponse benchmark_producer_1(final ClientState clientState,
-                                               final ThreadState_Producer_1 threadState) throws Exception {
+    @Threads(4)
+    public ClientResponse benchmark_producer_4(final ClientState clientState,
+                                               final ThreadState_Producer_4 threadState) throws Exception {
         return iteration(clientState, threadState);
     }
-
-
-//    // 2 threads-producers
-//
-//    public static class ThreadState_Producer_2 extends CommonThreadState {
-//        @Override
-//        public int getProducerThreads() {
-//            return 2;
-//        }
-//    }
-//
-//    @Benchmark
-//    @Threads(2)
-//    public ClientResponse benchmark_producer_2(final ClientState clientState,
-//                                               final ThreadState_Producer_2 threadState) throws Exception {
-//        return iteration(clientState, threadState);
-//    }
-//
-//
-//    // 3 threads-producers
-//
-//    public static class ThreadState_Producer_3 extends CommonThreadState {
-//        @Override
-//        public int getProducerThreads() {
-//            return 3;
-//        }
-//    }
-//
-//    @Benchmark
-//    @Threads(3)
-//    public ClientResponse benchmark_producer_3(final ClientState clientState,
-//                                               final ThreadState_Producer_3 threadState) throws Exception {
-//        return iteration(clientState, threadState);
-//    }
-//
-//
-//    // 4 threads-producers
-//
-//    public static class ThreadState_Producer_4 extends CommonThreadState {
-//        @Override
-//        public int getProducerThreads() {
-//            return 4;
-//        }
-//    }
-//
-//    @Benchmark
-//    @Threads(4)
-//    public ClientResponse benchmark_producer_4(final ClientState clientState,
-//                                               final ThreadState_Producer_4 threadState) throws Exception {
-//        return iteration(clientState, threadState);
-//    }
 }

@@ -1,4 +1,4 @@
-package com.example.benchmark.analysis.java;
+package com.example.benchmark.analysis.clients.baseline;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,7 @@ import com.example.benchmark.Utils;
 import com.example.client.AdaptedClient;
 import com.example.client.ClientAdapter;
 import com.example.client.ClientConfiguration;
-import com.example.client.impl.JavaClientAdapter;
+import com.example.client.impl.BaselineClientAdapter;
 import com.example.client.model.ClientRequest;
 import com.example.client.model.ClientResponse;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -37,7 +37,7 @@ import org.openjdk.jmh.annotations.Warmup;
 @Fork(1)
 @Warmup(iterations = 2, time = 30)
 @Measurement(iterations = 4, time = 30)
-public class JavaClientAnalysis {
+public class BaselineClientAnalysis {
 
     private static final String URL = Utils.SERVER_URL;
 
@@ -45,17 +45,16 @@ public class JavaClientAnalysis {
     public static class ClientState {
 
         @Param(value = {
-                "JAVA_CLIENT",
+                "BASELINE_CLIENT",
         })
         private String clientName;
         @Param(value = {
-//                "2",
+                "2",
                 "4",
-//                "6",
+                "6",
                 "8",
-//                "10",
-//                "12",
-//                "16",
+                "10",
+                "12",
         })
         private int ioThreads;
         @Param(value = {
@@ -63,15 +62,15 @@ public class JavaClientAnalysis {
         })
         private int bodySize;
 
-        private JavaClientAdapter client;
+        private BaselineClientAdapter client;
         private byte[] body;
 
         @Setup(Level.Trial)
         public void setup() {
-            if (!AdaptedClient.JAVA_CLIENT.name().equals(clientName)) {
+            if (!AdaptedClient.BASELINE_CLIENT.name().equals(clientName)) {
                 throw new IllegalArgumentException("Wrong client name + '" + clientName + "'");
             }
-            client = new JavaClientAdapter(new ClientConfiguration(ioThreads));
+            client = new BaselineClientAdapter(new ClientConfiguration(ioThreads));
             if (bodySize == 0) {
                 body = null;
             } else {

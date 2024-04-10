@@ -1,10 +1,9 @@
-package com.example.benchmark.analysis.apache;
+package com.example.benchmark.analysis.load;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -13,10 +12,9 @@ import com.example.benchmark.Utils;
 import com.example.client.AdaptedClient;
 import com.example.client.ClientAdapter;
 import com.example.client.ClientConfiguration;
-import com.example.client.impl.ApacheClientAdapter;
+import com.example.client.impl.AsyncClientAdapter;
 import com.example.client.model.ClientRequest;
 import com.example.client.model.ClientResponse;
-import org.apache.hc.core5.pool.PoolConcurrencyPolicy;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -37,8 +35,8 @@ import org.openjdk.jmh.annotations.Warmup;
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @Fork(1)
 @Warmup(iterations = 2, time = 30)
-@Measurement(iterations = 4, time = 30)
-public class ApacheClientAnalysis {
+@Measurement(iterations = 12, time = 20)
+public class ConstantLoadAnalysis {
 
     private static final String URL = Utils.SERVER_URL;
 
@@ -46,64 +44,39 @@ public class ApacheClientAnalysis {
     public static class ClientState {
 
         @Param(value = {
-                "APACHE_CLIENT",
+//                "BASELINE_CLIENT",
+//                "JAVA_CLIENT",
+                "ASYNC_CLIENT",
+//                "APACHE_CLIENT",
         })
         private String clientName;
         @Param(value = {
-                "STRICT",
-                "LAX",
-        })
-        private String poolPolicy;
-        @Param(value = {
                 "2",
                 "4",
-//                "6",
                 "8",
-//                "10",
-//                "12",
-                "16",
+                "10",
+                "12",
         })
         private int ioThreads;
-        @Param(value = {
-                "0",
-//                "2048",
-//                "8192",
-//                "32768",
-//                "131072",
-//                "524288",
-        })
-        private int bodySize;
 
-        private ClientAdapter<?, ?> client;
-        private byte[] body;
+        private AsyncClientAdapter client;
 
         @Setup(Level.Trial)
         public void setup() {
-            if (!AdaptedClient.APACHE_CLIENT.name().equals(clientName)) {
+            if (!AdaptedClient.ASYNC_CLIENT.name().equals(clientName)) {
                 throw new IllegalArgumentException("Wrong client name + '" + clientName + "'");
             }
-            client = new ApacheClientAdapter(new ClientConfiguration(ioThreads), PoolConcurrencyPolicy.valueOf(poolPolicy));
-            if (bodySize == 0) {
-                body = null;
-            } else {
-                body = new byte[bodySize];
-                ThreadLocalRandom.current().nextBytes(body);
-            }
+            client = new AsyncClientAdapter(new ClientConfiguration(ioThreads));
         }
 
         @TearDown(Level.Trial)
         public void tearDown() throws Exception {
             client.shutdown();
             client = null;
-            body = null;
         }
 
         public ClientAdapter<?, ?> getClient() {
             return client;
-        }
-
-        public byte[] getBody() {
-            return body;
         }
     }
 
@@ -115,7 +88,8 @@ public class ApacheClientAnalysis {
         }
 
         @Param(value = {
-                "256",
+                "64",
+                "1024",
         })
         private int parallelism;
 
@@ -149,8 +123,7 @@ public class ApacheClientAnalysis {
                     continue;
                 }
 
-                final byte[] body = clientState.getBody();
-                final Object request = client.mapRequest(new ClientRequest(URL, body));
+                final Object request = client.mapRequest(new ClientRequest(URL, null));
                 futures.set(i, client.sendUnchecked(request));
 
                 if (future != null) {
@@ -166,13 +139,18 @@ public class ApacheClientAnalysis {
         }
     }
 
-
-    // 1 thread-producer
+    // 1 threads-producers
 
     public static class ThreadState_Producer_1 extends CommonThreadState {
+
+        @Param(value = {
+                "1",
+        })
+        private int producerThreads;
+
         @Override
         public int getProducerThreads() {
-            return 1;
+            return producerThreads;
         }
     }
 
@@ -187,9 +165,15 @@ public class ApacheClientAnalysis {
     // 2 threads-producers
 
     public static class ThreadState_Producer_2 extends CommonThreadState {
+
+        @Param(value = {
+                "2",
+        })
+        private int producerThreads;
+
         @Override
         public int getProducerThreads() {
-            return 2;
+            return producerThreads;
         }
     }
 
@@ -199,38 +183,50 @@ public class ApacheClientAnalysis {
                                                final ThreadState_Producer_2 threadState) throws Exception {
         return iteration(clientState, threadState);
     }
-//
-//
-//    // 3 threads-producers
-//
-//    public static class ThreadState_Producer_3 extends CommonThreadState {
-//        @Override
-//        public int getProducerThreads() {
-//            return 3;
-//        }
-//    }
-//
-//    @Benchmark
-//    @Threads(3)
-//    public ClientResponse benchmark_producer_3(final ClientState clientState,
-//                                               final ThreadState_Producer_3 threadState) throws Exception {
-//        return iteration(clientState, threadState);
-//    }
-//
-//
-//    // 4 threads-producers
-//
-//    public static class ThreadState_Producer_4 extends CommonThreadState {
-//        @Override
-//        public int getProducerThreads() {
-//            return 4;
-//        }
-//    }
-//
-//    @Benchmark
-//    @Threads(4)
-//    public ClientResponse benchmark_producer_4(final ClientState clientState,
-//                                               final ThreadState_Producer_4 threadState) throws Exception {
-//        return iteration(clientState, threadState);
-//    }
+
+
+    // 3 threads-producers
+
+    public static class ThreadState_Producer_3 extends CommonThreadState {
+
+        @Param(value = {
+                "3",
+        })
+        private int producerThreads;
+
+        @Override
+        public int getProducerThreads() {
+            return producerThreads;
+        }
+    }
+
+    @Benchmark
+    @Threads(3)
+    public ClientResponse benchmark_producer_3(final ClientState clientState,
+                                               final ThreadState_Producer_3 threadState) throws Exception {
+        return iteration(clientState, threadState);
+    }
+
+
+    // 4 threads-producers
+
+    public static class ThreadState_Producer_4 extends CommonThreadState {
+
+        @Param(value = {
+                "4",
+        })
+        private int producerThreads;
+
+        @Override
+        public int getProducerThreads() {
+            return producerThreads;
+        }
+    }
+
+    @Benchmark
+    @Threads(4)
+    public ClientResponse benchmark_producer_4(final ClientState clientState,
+                                               final ThreadState_Producer_4 threadState) throws Exception {
+        return iteration(clientState, threadState);
+    }
 }
